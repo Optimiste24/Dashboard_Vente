@@ -44,13 +44,14 @@ background_color = "#F5F7FA"  # Gris clair professionnel
 # CHARGEMENT DES DONNÉES
 # --------------------------
 
-url = "https://https://drive.google.com/drive/u/1/folders/1a7rt-KmjQGsLfHHdlku-ki2sSpo3ZJea/train.csv"
+url = "https://drive.google.com/uc?id=1a7rt-KmjQGsLfHHdlku-ki2sSpo3ZJea"
 train = pd.read_csv(url, parse_dates=["date"])
 
 @st.cache_data
 def load_data():
     try:
-        train = pd.read_csv(url, parse_dates=["date"])
+        # Utilisation du bon lien Google Drive
+        # train = pd.read_csv(url, parse_dates=["date"])
         stores = pd.read_csv("stores.csv")
         holidays = pd.read_csv("holidays_events.csv", parse_dates=["date"])
         oil = pd.read_csv("oil.csv", parse_dates=["date"])
@@ -74,6 +75,8 @@ train, stores, holidays, oil, merged_data = load_data()
 
 if train is None:
     st.stop()
+
+
 
 # --------------------------
 # FONCTIONS UTILITAIRES

@@ -51,7 +51,7 @@ train = pd.read_csv(url, parse_dates=["date"])
 def load_data():
     try:
         # Utilisation du bon lien Google Drive
-        # train = pd.read_csv(url, parse_dates=["date"])
+        train = pd.read_csv(url, parse_dates=["date"])
         stores = pd.read_csv("stores.csv")
         holidays = pd.read_csv("holidays_events.csv", parse_dates=["date"])
         oil = pd.read_csv("oil.csv", parse_dates=["date"])

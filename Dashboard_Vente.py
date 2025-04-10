@@ -16,7 +16,7 @@ import datetime
 from matplotlib import dates as mdates
 from scipy import stats
 import plotly.express as px
-import os
+
 
 # --------------------------
 # CONFIGURATION DE LA PAGE
@@ -46,27 +46,28 @@ background_color = "#F5F7FA"  # Gris clair professionnel
 # CHARGEMENT DES DONNÉES
 # --------------------------
 
-# Définir le chemin du dossier
-DATA_PATH = r'C:\Users\Optimiste\OneDrive\Desktop\Portfolio\Vente_épicérie'
+# Chargement du fichier CSV depuis Google Drive
+file_id = "1dNude8Z1HhmlvH18dVn2OD_YupLaL1mH"
+url = f"https://drive.google.com/uc?id={file_id}"
 
 @st.cache_data
 def load_data():
     try:
-        train = pd.read_csv(os.path.join(DATA_PATH, "train.csv"), parse_dates=["date"])
-        stores = pd.read_csv(os.path.join(DATA_PATH, "stores.csv"))
-        holidays = pd.read_csv(os.path.join(DATA_PATH, "holidays_events.csv"), parse_dates=["date"])
-        oil = pd.read_csv(os.path.join(DATA_PATH, "oil.csv"), parse_dates=["date"])
-
+        train = pd.read_csv(url, parse_dates=["date"])
+        stores = pd.read_csv("stores.csv")
+        holidays = pd.read_csv("holidays_events.csv", parse_dates=["date"])
+        oil = pd.read_csv("oil.csv", parse_dates=["date"])
+        
         # Nettoyage des données
         train = train.dropna(subset=["sales"])
         oil = oil.ffill().bfill()
-
+        
         # Fusion des données
         merged_data = train.merge(stores, on="store_nbr", how="left")
         merged_data = merged_data.merge(
             holidays, on="date", how="left", suffixes=('', '_holiday')
         ).merge(oil, on="date", how="left").rename(columns={"dcoilwtico": "oil_price"})
-
+        
         return train, stores, holidays, oil, merged_data
     except Exception as e:
         st.error(f"Erreur lors du chargement: {str(e)}")

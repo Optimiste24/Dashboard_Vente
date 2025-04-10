@@ -16,6 +16,7 @@ import datetime
 from matplotlib import dates as mdates
 from scipy import stats
 import plotly.express as px
+import os
 
 # --------------------------
 # CONFIGURATION DE LA PAGE
@@ -40,32 +41,32 @@ primary_color = "#4B8DF8"  # Bleu professionnel
 secondary_color = "#FF6F61"  # Corail dynamique
 background_color = "#F5F7FA"  # Gris clair professionnel
 
+
 # --------------------------
 # CHARGEMENT DES DONNÉES
 # --------------------------
 
-url = "https://drive.google.com/uc?id=1a7rt-KmjQGsLfHHdlku-ki2sSpo3ZJea"
-train = pd.read_csv(url, parse_dates=["date"])
+# Définir le chemin du dossier
+DATA_PATH = r'C:\Users\Optimiste\OneDrive\Desktop\Portfolio\Vente_épicérie'
 
 @st.cache_data
 def load_data():
     try:
-        # Utilisation du bon lien Google Drive
-        train = pd.read_csv(url, parse_dates=["date"])
-        stores = pd.read_csv("stores.csv")
-        holidays = pd.read_csv("holidays_events.csv", parse_dates=["date"])
-        oil = pd.read_csv("oil.csv", parse_dates=["date"])
-        
+        train = pd.read_csv(os.path.join(DATA_PATH, "train.csv"), parse_dates=["date"])
+        stores = pd.read_csv(os.path.join(DATA_PATH, "stores.csv"))
+        holidays = pd.read_csv(os.path.join(DATA_PATH, "holidays_events.csv"), parse_dates=["date"])
+        oil = pd.read_csv(os.path.join(DATA_PATH, "oil.csv"), parse_dates=["date"])
+
         # Nettoyage des données
         train = train.dropna(subset=["sales"])
         oil = oil.ffill().bfill()
-        
+
         # Fusion des données
         merged_data = train.merge(stores, on="store_nbr", how="left")
         merged_data = merged_data.merge(
             holidays, on="date", how="left", suffixes=('', '_holiday')
         ).merge(oil, on="date", how="left").rename(columns={"dcoilwtico": "oil_price"})
-        
+
         return train, stores, holidays, oil, merged_data
     except Exception as e:
         st.error(f"Erreur lors du chargement: {str(e)}")
@@ -75,7 +76,6 @@ train, stores, holidays, oil, merged_data = load_data()
 
 if train is None:
     st.stop()
-
 
 
 # --------------------------

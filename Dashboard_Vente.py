@@ -11,6 +11,7 @@ import pandas as pd
 import zipfile
 from io import BytesIO
 import os
+from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -49,61 +50,29 @@ background_color = "#F5F7FA"  # Gris clair professionnel
 # CHARGEMENT DES DONNÉES
 # --------------------------
 
-
+# --------------------------
+# CHARGEMENT DES DONNÉES (EN PREMIER)
+# --------------------------
 @st.cache_data
-def load_data(zip_path):
+def load_and_extract_data(zip_path, extract_to='Data'):
     try:
-        # Vérifier si le fichier ZIP existe localement
-        if not os.path.exists(zip_path):
-            st.error(f"Fichier ZIP introuvable: {zip_path}")
-            return None, None, None, None, None
+        Path(extract_to).mkdir(exist_ok=True)
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
         
-        # Lire les fichiers CSV depuis le ZIP local
-        with zipfile.ZipFile(zip_path) as zip_file:
-            # Liste des fichiers disponibles (pour debug)
-            st.sidebar.write("Fichiers dans le ZIP:", zip_file.namelist())
-            
-            with zip_file.open('train.csv') as train_file:
-                train = pd.read_csv(train_file, parse_dates=["date"])
-            
-            with zip_file.open('stores.csv') as stores_file:
-                stores = pd.read_csv(stores_file)
-                
-            with zip_file.open('holidays_events.csv') as holidays_file:
-                holidays = pd.read_csv(holidays_file, parse_dates=["date"])
-                
-            with zip_file.open('oil.csv') as oil_file:
-                oil = pd.read_csv(oil_file, parse_dates=["date"])
-        
-        # Nettoyage des données
-        train = train.dropna(subset=["sales"])
-        oil = oil.ffill().bfill()
-        
-        # Fusion des données
-        merged_data = train.merge(stores, on="store_nbr", how="left")
-        merged_data = merged_data.merge(
-            holidays, on="date", how="left", suffixes=('', '_holiday')
-        ).merge(oil, on="date", how="left").rename(columns={"dcoilwtico": "oil_price"})
-        
-        return train, stores, holidays, oil, merged_data
-        
+        return {
+            'train': pd.read_csv(f'{extract_to}/train.csv', parse_dates=['date']),
+            'stores': pd.read_csv(f'{extract_to}/stores.csv'),
+            'holidays': pd.read_csv(f'{extract_to}/holidays_events.csv', parse_dates=['date']),
+            'oil': pd.read_csv(f'{extract_to}/oil.csv', parse_dates=['date']).ffill().bfill()
+        }
     except Exception as e:
-        st.error(f"Erreur lors du chargement: {str(e)}")
-        st.error("Vérifiez que le ZIP contient bien les fichiers requis avec les noms exacts")
-        return None, None, None, None, None
+        st.error(f"Erreur: {str(e)}")
+        st.stop()
 
-# Chemin vers le fichier ZIP (même répertoire que le script)
-ZIP_PATH = "Data.zip"  # Remplacez par le nom exact de votre fichier ZIP
-
-train, stores, holidays, oil, merged_data = load_data(ZIP_PATH)
-
-if train is None:
-    st.stop()
-else:
-    st.success("Données chargées avec succès!")
-    st.write("Aperçu des données fusionnées:", merged_data.head())
-
-
+# Chargement initial
+data = load_and_extract_data("Data.zip")
+train = data['train']
 
 
 # --------------------------
@@ -160,8 +129,10 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("**🔧 Paramètres Globaux**")
+    
+    # Maintenant safe car train est chargé
     date_range = st.date_input(
-        "Période d'analyse",
+        "Période",
         value=[train['date'].min().date(), train['date'].max().date()],
         min_value=train['date'].min().date(),
         max_value=train['date'].max().date()

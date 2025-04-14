@@ -55,7 +55,7 @@ def load_data():
 
 
 def about_page():
-    st.title("👨‍💻 À Propos")
+    st.title("👨‍💻 À Propos de Moi")
     
     # Section Profil avec colonnes
     col1, col2 = st.columns([0.3, 0.7])

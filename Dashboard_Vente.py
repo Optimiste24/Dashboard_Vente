@@ -62,9 +62,9 @@ def about_page():
     
     with col1:
         # Lien direct vers l'image (remplacé par un hébergement public valide)
-        st.image("Profil_pro.jpg", 
-                width=200,
-                caption="Yassh Agoro")
+        #st.image("Profil_pro.jpg", 
+         #       width=200,
+         #       caption="Yassh Agoro")
     
     with col2:
         st.markdown("""

@@ -7,3 +7,5 @@ numpy
 scikit-learn
 openpyxl
 plotly
+tensorflow>=2.10.0
+wrapt>=1.14.1

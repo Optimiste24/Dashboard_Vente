@@ -62,7 +62,7 @@ def about_page():
     
     with col1:
         # Lien direct vers l'image 
-        st.image("https://storage.googleapis.com/venteequateur/data/Profil_pro.JPG", 
+        st.image("https://storage.googleapis.com/venteequateur/data/Profil_pro.jpg", 
                 width=200,
                 caption="Yassh Agoro")
     
